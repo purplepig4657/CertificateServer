@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     if cert_req_response.status_code == 200:
         print('Request Success!')
-        sleep(5)
+        sleep(2)
         ip_hash = hashlib.sha256(ip.encode())
         print(ip_hash.hexdigest())
         download_cert_key_and_crt_file(ip_hash.hexdigest())

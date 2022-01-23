@@ -36,7 +36,7 @@ def make_config_file(ip, ip_hash, name):
 def generate_sh_file(ip_hash):
     commands = f'''#!/bin/bash
     openssl genrsa -out ./cert/{ip_hash}.key 2048
-    openssl req -sha256 -out ./cert/{ip_hash}.csr -key ./cert/{ip_hash}.key -config ./cert/{ip_hash}.conf
+    openssl req -new -sha256 -out ./cert/{ip_hash}.csr -key ./cert/{ip_hash}.key -config ./cert/{ip_hash}.conf
     openssl x509 -req -in ./cert/{ip_hash}.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out ./cert/{ip_hash}.crt -days 500 -sha256 -extfile ./cert/{ip_hash}.conf -extensions req_ext
     '''
 
@@ -52,5 +52,5 @@ def generate_key_and_crt_file(json):
     make_config_file(ip, ip_hash, name)
     generate_sh_file(ip_hash)
 
-    os.chmod(f'{ip_hash}', 0o755)
+    os.chmod(f'./{ip_hash}.sh', 0o755)
     os.system(f'./{ip_hash}.sh')
