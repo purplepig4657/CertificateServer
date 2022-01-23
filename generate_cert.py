@@ -34,16 +34,23 @@ def make_config_file(ip, ip_hash, name):
         ext.write(content)
 
 
+def generate_sh_file(ip_hash):
+    commands = f'''#!/bin/bash
+    openssl genrsa -out ./cert/{ip_hash}.key 2048
+    openssl req -new -sha256 -nodes -out ./cert/{ip_hash}.csr newkey rsa:2048 -keyout ./cert/{ip_hash}.key -config <( cat ./cert/{ip_hash}.csr.cnf )
+    openssl x509 -req -in ./cert/{ip_hash}.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out ./cert/{ip_hash}.crt -days 500 -sha256 -extfile ./cert/{ip_hash}.ext
+    '''
+
+    with open(f'./{ip_hash}.sh', 'w') as sh:
+        sh.write(commands)
+
+
 def generate_key_and_crt_file(json):
     name = json['name']
     ip = json['ip']
     ip_hash = hashlib.sha256(ip.encode()).hexdigest()
 
     make_config_file(ip, ip_hash, name)
+    generate_sh_file(ip_hash)
 
-    os.system('openssl genrsa -out server.key 2048 ')
-    os.system(f'openssl req -new -sha256 -nodes -out server.csr newkey rsa:2048 -keyout server.key config <( cat {ip_hash}.csr.cnf )')
-    os.system(f'openssl x509 -req -in server.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out server.crt -days 500 -sha256 -extfile {ip_hash}.ext')
-
-
-
+    os.system(f'./{ip_hash}.sh')
